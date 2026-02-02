@@ -38,18 +38,21 @@
       </div>
 
       <aside class="panel-side">
-        <div class="chip">解析规则</div>
-        <ul>
-          <li>自动识别 1-8 位玩家的背包地址。</li>
-          <li>DIY 卡片识别为第四段 <code>000016A2</code>。</li>
-        </ul>
-        <div class="chip">显示偏好</div>
+        <div class="chip">显示语言</div>
         <div class="select-row">
           <label for="langSelect">名称语言</label>
           <select id="langSelect">
             <option value="schi" selected>简体中文</option>
             <option value="eng">English</option>
           </select>
+        </div>
+        <div class="download-images is-hidden" id="downloadImagesPanel">
+          <div class="chip">图片资源</div>
+          <p>未检测到 img/ 图片目录。</p>
+          <div class="download-images-actions">
+            <button type="button" id="downloadImagesBtn" class="secondary">下载图片包</button>
+          </div>
+          <p class="download-status" id="imagesZipStatus"></p>
         </div>
       </aside>
     </section>
@@ -97,6 +100,37 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="imageCopyrightBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="imageCopyrightTitle">
+      <h3 id="imageCopyrightTitle">图片版权提醒</h3>
+      <p>游戏物品图片版权归任天堂所有，仅用于学习交流。</p>
+      <p>请勿将图片用于任何商业用途。</p>
+      <div class="modal-actions">
+        <button type="button" id="imageCopyrightOk" class="primary">我已知晓</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="imageDownloadBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="imageDownloadTitle">
+      <h3 id="imageDownloadTitle">未发现图片资源</h3>
+      <p>当前仅有程序与 CSV，图片需要单独下载。</p>
+      <p>是否现在前往 release 下载图片包？</p>
+      <div class="modal-actions modal-actions-split">
+        <button type="button" id="imageDownloadYes" class="primary">是，去下载</button>
+        <button type="button" id="imageDownloadNo" class="secondary">否</button>
+      </div>
+      <p class="download-hint">如需补充图片，可点击左侧的“下载图片包”。</p>
+      <div class="download-zip">
+        <p class="download-hint">也可以加载本地 img.zip（内含 img/ 图片文件）。</p>
+        <button type="button" id="loadImagesZipBtnModal" class="secondary">加载图片压缩包</button>
+        <p class="download-status" id="imagesZipStatusModal"></p>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="imagesZipInput" accept=".zip" hidden />
   <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </body>
 </html>

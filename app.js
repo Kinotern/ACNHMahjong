@@ -11,6 +11,16 @@
 
 const DIY_MARKER = 0x000016A2;
 const EMPTY_ITEM = 0x0000FFFE;
+const IMAGE_RELEASE_URL =
+  'https://github.com/Kinotern/ACNHMahjong/releases/tag/仅程序图片';
+const IMAGE_PROBE_FALLBACKS = [
+  'img/1000Bell.png',
+  'img/100Bell.png',
+  'img/AccessoryGlassBirthday0.png',
+  'img/PltApple.png',
+  'img/FlwRose.png',
+  'img/FtrSofa.png',
+];
 
 const IMAGE_NAME_OVERRIDES = [
   { match: (name) => name.startsWith('PltMoney'), target: 'PltMoney' },
@@ -64,12 +74,25 @@ const noticeCloseEl = document.getElementById('noticeClose');
 const refundBtnEl = document.getElementById('refundBtn');
 const refundTipEl = document.getElementById('refundTip');
 const noticeLicenseEl = document.getElementById('noticeLicense');
+const imageCopyrightBackdropEl = document.getElementById('imageCopyrightBackdrop');
+const imageCopyrightOkEl = document.getElementById('imageCopyrightOk');
+const imageDownloadBackdropEl = document.getElementById('imageDownloadBackdrop');
+const imageDownloadYesEl = document.getElementById('imageDownloadYes');
+const imageDownloadNoEl = document.getElementById('imageDownloadNo');
+const downloadImagesPanelEl = document.getElementById('downloadImagesPanel');
+const downloadImagesBtnEl = document.getElementById('downloadImagesBtn');
+const loadImagesZipBtnEl = document.getElementById('loadImagesZipBtn');
+const loadImagesZipBtnModalEl = document.getElementById('loadImagesZipBtnModal');
+const imagesZipInputEl = document.getElementById('imagesZipInput');
+const imagesZipStatusEl = document.getElementById('imagesZipStatus');
+const imagesZipStatusModalEl = document.getElementById('imagesZipStatusModal');
 
 let lastParsedSignature = '';
 let parseTimer = null;
 let pages = [{ title: '第1页', text: '' }];
 let currentPageIndex = 0;
 let renderToken = 0;
+let pendingImageFlow = false;
 
 init();
 
@@ -87,6 +110,15 @@ function init() {
       state.ready = true;
       state.dataWarning = buildDataWarning(err);
       parseAndRender();
+    })
+    .finally(() => {
+      checkImageAvailability()
+        .then((available) => {
+          if (!available) handleMissingImages();
+        })
+        .catch((err) => {
+          console.warn('Image check failed', err);
+        });
     });
 
   parseBtn.addEventListener('click', parseAndRender);
@@ -129,6 +161,7 @@ function init() {
       if (noticeLicenseEl) noticeLicenseEl.classList.add('show');
     });
   }
+  setupImageDownloadFlow();
 }
 
 function buildAddressMap() {
@@ -302,17 +335,15 @@ function clampCurrentPage() {
 }
 
 function showNotice() {
-  if (!noticeBackdropEl) return;
-  document.body.classList.add('modal-open');
-  noticeBackdropEl.classList.add('show');
-  noticeBackdropEl.setAttribute('aria-hidden', 'false');
+  showBackdrop(noticeBackdropEl);
 }
 
 function hideNotice() {
-  if (!noticeBackdropEl) return;
-  document.body.classList.remove('modal-open');
-  noticeBackdropEl.classList.remove('show');
-  noticeBackdropEl.setAttribute('aria-hidden', 'true');
+  hideBackdrop(noticeBackdropEl);
+  if (pendingImageFlow) {
+    pendingImageFlow = false;
+    showImageCopyrightNotice();
+  }
 }
 
 function renderPager() {
@@ -694,4 +725,230 @@ function buildDataWarningIfEmpty() {
     return 'CSV 未加载：请用本地服务器打开页面。';
   }
   return 'CSV 未加载：请确认 csv/ 目录可访问。';
+}
+
+function showBackdrop(backdropEl) {
+  if (!backdropEl) return;
+  document.body.classList.add('modal-open');
+  backdropEl.classList.add('show');
+  backdropEl.setAttribute('aria-hidden', 'false');
+}
+
+function hideBackdrop(backdropEl) {
+  if (!backdropEl) return;
+  backdropEl.classList.remove('show');
+  backdropEl.setAttribute('aria-hidden', 'true');
+  if (!document.querySelector('.modal-backdrop.show')) {
+    document.body.classList.remove('modal-open');
+  }
+}
+
+function setupImageDownloadFlow() {
+  if (downloadImagesBtnEl) {
+    downloadImagesBtnEl.addEventListener('click', openImageRelease);
+  }
+  if (loadImagesZipBtnEl && imagesZipInputEl) {
+    loadImagesZipBtnEl.addEventListener('click', () => imagesZipInputEl.click());
+  }
+  if (loadImagesZipBtnModalEl && imagesZipInputEl) {
+    loadImagesZipBtnModalEl.addEventListener('click', () => imagesZipInputEl.click());
+  }
+  if (imagesZipInputEl) {
+    imagesZipInputEl.addEventListener('change', handleImagesZipSelected);
+  }
+  if (imageCopyrightOkEl) {
+    imageCopyrightOkEl.addEventListener('click', () => {
+      hideBackdrop(imageCopyrightBackdropEl);
+      showImageDownloadPrompt();
+    });
+  }
+  if (imageDownloadYesEl) {
+    imageDownloadYesEl.addEventListener('click', () => {
+      openImageRelease();
+      hideBackdrop(imageDownloadBackdropEl);
+      revealDownloadPanel();
+    });
+  }
+  if (imageDownloadNoEl) {
+    imageDownloadNoEl.addEventListener('click', () => {
+      hideBackdrop(imageDownloadBackdropEl);
+      revealDownloadPanel();
+    });
+  }
+  if (imageDownloadBackdropEl) {
+    imageDownloadBackdropEl.addEventListener('click', (event) => {
+      if (event.target === imageDownloadBackdropEl) {
+        hideBackdrop(imageDownloadBackdropEl);
+        revealDownloadPanel();
+      }
+    });
+  }
+}
+
+function handleMissingImages() {
+  revealDownloadPanel();
+  if (noticeBackdropEl && noticeBackdropEl.classList.contains('show')) {
+    pendingImageFlow = true;
+    return;
+  }
+  showImageCopyrightNotice();
+}
+
+function showImageCopyrightNotice() {
+  showBackdrop(imageCopyrightBackdropEl);
+}
+
+function showImageDownloadPrompt() {
+  showBackdrop(imageDownloadBackdropEl);
+}
+
+function revealDownloadPanel() {
+  if (downloadImagesPanelEl) downloadImagesPanelEl.classList.remove('is-hidden');
+}
+
+function openImageRelease() {
+  window.open(IMAGE_RELEASE_URL, '_blank', 'noopener');
+}
+
+function setZipStatus(message) {
+  if (imagesZipStatusEl) imagesZipStatusEl.textContent = message;
+  if (imagesZipStatusModalEl) imagesZipStatusModalEl.textContent = message;
+}
+
+async function handleImagesZipSelected(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  setZipStatus('正在读取压缩包…');
+  revealDownloadPanel();
+  try {
+    if (!window.JSZip) {
+      setZipStatus('缺少解压组件，请联网刷新后重试。');
+      return;
+    }
+    if (!window.showDirectoryPicker) {
+      setZipStatus('当前浏览器不支持自动解压，请手动解压到应用目录。');
+      return;
+    }
+    const buffer = await file.arrayBuffer();
+    const dirHandle = await window.showDirectoryPicker({
+      id: 'acnhmahjong-images',
+      mode: 'readwrite',
+    });
+    await extractImagesZip(buffer, dirHandle);
+    const ok = await checkImageAvailability();
+    if (ok) {
+      setZipStatus('解压完成，已检测到图片资源。');
+    } else {
+      setZipStatus('未在当前网页目录检测到图片，请确保选择的是应用目录。');
+    }
+  } catch (err) {
+    console.error(err);
+    setZipStatus('解压失败，请检查压缩包或权限。');
+  } finally {
+    event.target.value = '';
+  }
+}
+
+async function extractImagesZip(buffer, dirHandle) {
+  const zip = await window.JSZip.loadAsync(buffer);
+  const imgHandle = await resolveImageTargetDirectory(dirHandle);
+  const entries = Object.values(zip.files);
+  for (const entry of entries) {
+    if (entry.dir) continue;
+    let relativePath = entry.name;
+    if (relativePath.startsWith('/')) relativePath = relativePath.slice(1);
+    if (relativePath.startsWith('img/')) {
+      relativePath = relativePath.slice(4);
+    } else {
+      continue;
+    }
+    if (!relativePath) continue;
+    const data = await entry.async('uint8array');
+    await writeFileToDirectory(imgHandle, relativePath, data);
+  }
+}
+
+async function resolveImageTargetDirectory(dirHandle) {
+  try {
+    await dirHandle.getFileHandle('index.html');
+    return await dirHandle.getDirectoryHandle('img', { create: true });
+  } catch (err) {
+    return dirHandle;
+  }
+}
+
+async function writeFileToDirectory(rootHandle, filePath, data) {
+  const segments = filePath.split('/').filter(Boolean);
+  if (!segments.length) return;
+  const fileName = segments.pop();
+  let currentHandle = rootHandle;
+  for (const segment of segments) {
+    currentHandle = await currentHandle.getDirectoryHandle(segment, { create: true });
+  }
+  const fileHandle = await currentHandle.getFileHandle(fileName, { create: true });
+  const writable = await fileHandle.createWritable();
+  await writable.write(data);
+  await writable.close();
+}
+
+function buildImageProbeList() {
+  const list = [...IMAGE_PROBE_FALLBACKS];
+  for (const row of state.itemsById.values()) {
+    if (row && row.iName) {
+      list.push(`img/${row.iName}.png`);
+      const normalized = normalizeImageName(row.iName);
+      if (normalized && normalized !== row.iName) {
+        list.push(`img/${normalized}.png`);
+      }
+    }
+    if (list.length >= 10) break;
+  }
+  return Array.from(new Set(list));
+}
+
+async function probeImage(src, timeoutMs = 1200) {
+  const cacheBusted = `${src}${src.includes('?') ? '&' : '?'}_=${Date.now()}`;
+  if (window.fetch && location.protocol !== 'file:') {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      const res = await fetch(cacheBusted, {
+        method: 'HEAD',
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    let settled = false;
+    const done = (ok) => {
+      if (settled) return;
+      settled = true;
+      resolve(ok);
+    };
+    const timer = setTimeout(() => done(false), timeoutMs);
+    img.onload = () => {
+      clearTimeout(timer);
+      done(true);
+    };
+    img.onerror = () => {
+      clearTimeout(timer);
+      done(false);
+    };
+    img.src = cacheBusted;
+  });
+}
+
+async function checkImageAvailability() {
+  const probes = buildImageProbeList();
+  for (const src of probes) {
+    const ok = await probeImage(src);
+    if (ok) return true;
+  }
+  return false;
 }

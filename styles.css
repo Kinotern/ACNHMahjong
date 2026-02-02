@@ -91,6 +91,10 @@ body.modal-open {
   flex-wrap: wrap;
 }
 
+.modal-actions-split {
+  justify-content: center;
+}
+
 .modal .primary {
   margin-top: 0;
 }
@@ -132,6 +136,25 @@ body.modal-open {
 
 .notice-license.show {
   display: block;
+}
+
+.download-hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.download-status {
+  margin: 0;
+  font-size: 12px;
+  color: var(--accent-3);
+  min-height: 16px;
+}
+
+.download-zip {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
 }
 
 body::before {
@@ -322,6 +345,31 @@ body::before {
 
 .select-row.compact {
   margin-top: 0;
+}
+
+.download-images {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px dashed rgba(40, 32, 20, 0.18);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.download-images-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.download-images p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.is-hidden {
+  display: none;
 }
 
 select {

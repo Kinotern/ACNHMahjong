@@ -151,8 +151,7 @@ body.modal-open {
   min-height: 16px;
 }
 
-.download-zip {
-  margin-top: 10px;
+.download-images-actions {
   display: grid;
   gap: 8px;
 }
@@ -357,11 +356,7 @@ body::before {
   background: rgba(255, 255, 255, 0.8);
 }
 
-.download-images-actions {
-  display: grid;
-  gap: 8px;
-}
-
+/* 侧栏图片资源区文案 */
 .download-images p {
   margin: 0;
   font-size: 12px;

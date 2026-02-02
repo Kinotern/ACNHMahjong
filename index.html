@@ -1,0 +1,102 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>动物森友会金手指解析工具</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-mark">ACNH</div>
+      <div>
+        <h1>动物森友会金手指解析工具</h1>
+        <p>粘贴金手指代码，一键可视化背包 40 格。</p>
+      </div>
+      <div class="hero-glow"></div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-main">
+        <label for="codeInput">金手指代码</label>
+        <textarea id="codeInput" spellcheck="false" placeholder="例如：
+08100000 B27BB758 0000001D 000009C9
+08100000 B27BB760 0000001D 000009C9"></textarea>
+        <div class="panel-actions">
+          <button id="parseBtn" class="primary">解析金手指</button>
+          <label class="toggle">
+            <input type="checkbox" id="autoParse" checked />
+            <span>自动解析</span>
+          </label>
+          <div class="select-row compact">
+            <label for="pageSelect">分页</label>
+            <select id="pageSelect"></select>
+          </div>
+          <div class="panel-meta" id="stats">等待输入…</div>
+        </div>
+      </div>
+
+      <aside class="panel-side">
+        <div class="chip">解析规则</div>
+        <ul>
+          <li>自动识别 1-8 位玩家的背包地址。</li>
+          <li>DIY 卡片识别为第四段 <code>000016A2</code>。</li>
+        </ul>
+        <div class="chip">显示偏好</div>
+        <div class="select-row">
+          <label for="langSelect">名称语言</label>
+          <select id="langSelect">
+            <option value="schi" selected>简体中文</option>
+            <option value="eng">English</option>
+          </select>
+        </div>
+      </aside>
+    </section>
+
+    <section class="grid-wrap">
+      <div class="grid-header">
+        <h2>背包视图</h2>
+        <div class="legend">
+          <span class="legend-item"><span class="dot dot-diy"></span>DIY</span>
+          <span class="legend-item"><span class="dot dot-unknown"></span>未知</span>
+        </div>
+      </div>
+      <div id="grid" class="grid"></div>
+      <div class="pager" id="pager"></div>
+      <div class="pager-jump">
+        <label for="pageJump">跳转页</label>
+        <input type="number" id="pageJump" min="1" step="1" placeholder="页码" />
+        <button type="button" id="pageJumpBtn" class="page-btn">跳转</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="noticeBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
+      <h3 id="noticeTitle">提示</h3>
+      <div class="notice-lines">
+        <p class="notice-line">本软件完全免费，如付费购买请立即依据我要退款的版权声明</p>
+        <p class="notice-line">截图进行退款</p>
+      </div>
+      <p>举报商家！</p>
+      <div class="modal-actions">
+        <button type="button" id="noticeClose" class="primary">我知道了</button>
+        <button type="button" id="refundBtn" class="secondary">我要退款！</button>
+      </div>
+      <p class="refund-tip" id="refundTip">请截图本页面作为退款依据。</p>
+      <div class="notice-license" id="noticeLicense">
+        <p>软件作者 Kinotern</p>
+        <p>csv依赖MyShiLingStar</p>
+        <p>游戏物品图片版权任天堂</p>
+        <p>本软件遵循 <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank" rel="noopener noreferrer">GPLv3</a> 许可。</p>
+        <p>软件未授权给任何人进行商业贩卖，本软件完全免费！</p>
+        <p>你可以自由使用、修改与再发布，但必须保留版权声明并在同一许可下公开源代码。</p>
+        <p>本软件不提供任何担保。</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

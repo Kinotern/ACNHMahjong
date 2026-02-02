@@ -46,6 +46,7 @@
             <option value="eng">English</option>
           </select>
         </div>
+        <!-- 图片资源缺失提示区：缺图时显示 -->
         <div class="download-images is-hidden" id="downloadImagesPanel">
           <div class="chip">图片资源</div>
           <p>未检测到 img/ 图片目录。</p>
@@ -100,6 +101,7 @@
     </div>
   </div>
 
+  <!-- 缺图时先展示版权提醒 -->
   <div class="modal-backdrop" id="imageCopyrightBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="imageCopyrightTitle">
       <h3 id="imageCopyrightTitle">图片版权提醒</h3>
@@ -111,6 +113,7 @@
     </div>
   </div>
 
+  <!-- 版权提醒后弹出下载提示 -->
   <div class="modal-backdrop" id="imageDownloadBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="imageDownloadTitle">
       <h3 id="imageDownloadTitle">未发现图片资源</h3>
@@ -121,16 +124,9 @@
         <button type="button" id="imageDownloadNo" class="secondary">否</button>
       </div>
       <p class="download-hint">如需补充图片，可点击左侧的“下载图片包”。</p>
-      <div class="download-zip">
-        <p class="download-hint">也可以加载本地 img.zip（内含 img/ 图片文件）。</p>
-        <button type="button" id="loadImagesZipBtnModal" class="secondary">加载图片压缩包</button>
-        <p class="download-status" id="imagesZipStatusModal"></p>
-      </div>
     </div>
   </div>
 
-  <input type="file" id="imagesZipInput" accept=".zip" hidden />
   <script src="app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </body>
 </html>
